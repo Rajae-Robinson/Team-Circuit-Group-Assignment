@@ -1,0 +1,163 @@
+<!--
+    Group Name: Team Circuit
+    Group members: Rajae Robinson, Ajaunie Brown, Joshua Barrett, Celine
+    Module: (CIT2011: Web Programming)
+    Tutor: Ms. Denise Allen
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ship Sail! Ship Sail! 'Ow much man deh pon board? | Game of Chance</title>
+    <link rel="stylesheet" href="./css/global.css">
+    <script>
+        // Globals
+        // registration
+        var playersData = []
+
+
+        // play game
+        var playerBounty = 10
+        var computerBounty = 10
+        var maxNumOfChances = 3
+        var computerHand = Math.floor((Math.random() * computerBounty) + 1)
+
+
+        function register() {
+            /*
+            Register will accept the values entered in the registration fields,
+            validate all entries using JavaScript validations, and then append the validated
+            content to a global JavaScript array called PlayersData.
+            */
+        }
+
+        function renderGame() {
+            // Hide registration form
+            document.getElementById("player-registration").classList.add("hide")
+
+            // show game UI
+            document.querySelector(".game").classList.remove("hide")
+
+            // Setting constraints for bounties
+            if(playerBounty < 0 ) playerBounty = 0
+            if(computerBounty < 0 ) computerBounty = 0
+            if(playerBounty > 20) playerBounty = 20
+            if(computerBounty > 20 ) computerBounty = 20
+
+            // Showing the player's bounty
+            document.querySelector(".player-bounty").innerHTML = "Player bounty: " + playerBounty + " kernels."
+            // Showing the computer's bounty
+            document.querySelector(".computer-bounty").innerHTML = "Computer bounty: " + computerBounty + " kernels."
+            
+            console.log("hand:", computerHand)
+        }
+
+        function resetComputerHand() {
+            // set computer hand by randomly generating the number of kernels in computers hand
+            computerHand = Math.floor((Math.random() * computerBounty) + 1)
+            console.log("hand:", computerHand)
+        }
+
+        function playGame() {
+            var playerGuess
+            var message = ''
+
+            // get guess input
+            var playerGuessInputElement = document.getElementById('player-guess-input')
+            var playerGuess = parseInt(playerGuessInputElement.value)
+
+            if(playerGuess > computerBounty) {
+                message = "Your guess cannot be higher than your bounty!"
+            } else if(playerGuess > computerHand) {
+                maxNumOfChances -=1
+                message = "Too high! Guess lower. You have " + maxNumOfChances + " guess(es) remaining."
+            } else if(playerGuess < computerHand) {
+                maxNumOfChances -= 1
+                message = "Too low! Guess higher. You have " + maxNumOfChances + " guess(es) remaining."
+            } else if(playerGuess === computerHand) {
+                message = "You guessed correctly! " + computerHand + " kernel(s) will now be added to your bounty."
+                message += "The computer took out another random set of kernels. You have three more tries. Guess again"
+                maxNumOfChances = 3
+                playerBounty += computerHand
+                computerBounty -= computerHand
+                playerGuessInputElement.value = ''
+                resetComputerHand()
+                renderGame()
+            }
+            
+            if(maxNumOfChances === 0) {
+                message = "Aw! You couldn't figure it out. The correct number was " + computerHand + ". " + computerHand + " kernel(s) will now be taken from your bounty."
+                message += "The computer took out another random set of kernels. You have three more tries. Guess again"
+                maxNumOfChances = 3
+                playerBounty -= computerHand
+                computerBounty += computerHand
+                playerGuessInputElement.value = ''
+                resetComputerHand()
+                renderGame()
+            }
+
+
+            if(playerBounty <= 0) {
+                message += "You lose!"
+                playerGuessInputElement.disabled = true
+                // TODO: Add try again button
+            }
+            
+            if(computerBounty <= 0) {
+                message = "You win! Computer has no kernels left."
+                playerGuessInputElement.disabled = true
+                // TODO: Add try again button
+            }
+
+            document.getElementById("game-message").innerHTML = message
+
+        }
+
+        function quit() {
+            // Hide registration form
+            document.getElementById("player-registration").classList.add("hide")
+            
+            // Hide game screen if it isn't already hidden
+            if(!('hide' in document.querySelector(".game").classList)) document.querySelector(".game").classList.add("hide")
+
+            // show quit screen
+            document.querySelector(".quit").classList.remove("hide")
+        }
+    </script>
+</head>
+<body>
+    <!-- Registration form -->
+    <form id="player-registration" onsubmit="register()">
+        <h1>Registration</h1>
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username">
+
+        <input type="submit" value="Register">
+        <input type="button" onclick="renderGame(false)" value="Play">
+        <input type="button" onclick="quit()" value="Quit">
+        <p class="error-message"></p>
+    </form>
+    
+    <!-- Game Screen -->
+    <div class="game hide">
+        <h1>Ship Sail! Ship Sail! 'Ow much man deh pon board?</h1>
+        <p class="player-bounty"></p>
+        <p class="computer-bounty"></p>
+        <label for="player-guess-input">Guess the number of kernels in the computer's hand:</label>
+        <input type="number" id="player-guess-input">
+        <input id="guess-btn" type="button" value="Guess" onclick="playGame()">
+        <p id="game-message"></p>
+        <input type="button" onclick="quit()" value="Quit">
+        
+    </div>
+
+    <!-- Quit Screen -->
+    <div class="quit hide">
+        <h1>Thanks for playing!</h1>
+        <p>Reload page to try again</p>
+    </div>
+</body>
+</html>

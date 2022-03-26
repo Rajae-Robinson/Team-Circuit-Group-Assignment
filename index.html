@@ -12,6 +12,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ship Sail! Ship Sail! 'Ow much man deh pon board? | Game of Chance</title>
+    <link rel="icon" type="image/x-icon" href="/imgs/ship.png">
     <link rel="stylesheet" href="./css/global.css">
     <script>
         // Globals
@@ -130,13 +131,13 @@
 </head>
 <body>
     <!-- Registration form -->
-    <form id="player-registration" onsubmit="register()">
+    <form id="player-registration">
         <h1>Registration</h1>
         <label for="username">Username:</label>
         <input type="text" name="username" id="username">
 
         <input type="submit" value="Register">
-        <input type="button" onclick="renderGame(false)" value="Play">
+        <input type="button" onclick="renderGame()" value="Play">
         <input type="button" onclick="quit()" value="Quit">
         <p class="error-message"></p>
     </form>

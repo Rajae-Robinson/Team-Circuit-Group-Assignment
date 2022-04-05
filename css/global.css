@@ -29,7 +29,7 @@ h1 {
     color: 	rgb(118,10,10);
 }
 
-input[type="button"], input[type="submit"] {
+input[type="button"] {
     border: none;
     border-radius: 8px;
     color: white;
@@ -37,13 +37,22 @@ input[type="button"], input[type="submit"] {
     cursor: pointer;
 }
 
-input[type="submit"] {
+#register-btn {
     background-color: rgb(24, 155, 231);
     transition: 200ms ease-in;
 }
 
-input[type="submit"]:hover {
+#register-btn:hover {
     background-color: rgb(22, 116, 170);
+}
+
+input[value="Play Again"] {
+    background-color: rgb(186, 206, 6);
+    transition: 200ms ease-in;
+}
+
+input[value="Play Again"]:hover {
+    background-color: rgb(138, 153, 3);
 }
 
 input[value="Quit"] {
@@ -62,6 +71,12 @@ input[value="Play"], #guess-btn {
 
 input[value="Play"]:hover, #guess-btn:hover {
     background-color: rgb(13, 156, 44);
+}
+
+input[type="button"]:disabled,
+input[disabled] {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
 
 .hide {

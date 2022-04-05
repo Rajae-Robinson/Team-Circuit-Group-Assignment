@@ -17,58 +17,74 @@
     <script>
         // Globals
         // registration
-        var playersData = []
+        let playersData = []
 
 
         // play game
-        var playerBounty = 10
-        var computerBounty = 10
-        var maxNumOfChances = 3
-        var computerHand = Math.floor((Math.random() * computerBounty) + 1)
-
+        const startingKernels = 100
+        let playerBounty = startingKernels
+        let computerBounty = startingKernels
+        let maxNumOfChances = 3
 
         function register() {
             /*
-            Register will accept the values entered in the registration fields,
-            validate all entries using JavaScript validations, and then append the validated
-            content to a global JavaScript array called PlayersData.
+             append the validated content to a global JavaScript array called PlayersData.
             */
+            payload = {
+               username: document.getElementById("username").value,
+               dob: document.getElementById("dob").value,
+               email: document.getElementById("email").value,
+               age: document.getElementById("age").value,
+               gender: document.getElementById("gender").value
+           }
+
+           playersData.push(payload)
+
+           document.getElementById("play-btn").disabled = false
+           document.getElementById("quit-btn").disabled = false
+           document.getElementById("register-btn").disabled = true
+
+           alert("Successfully registered! Click 'Play' to start")
         }
 
-        function renderGame() {
-            // Hide registration form
-            document.getElementById("player-registration").classList.add("hide")
-
-            // show game UI
-            document.querySelector(".game").classList.remove("hide")
-
-            // Setting constraints for bounties
-            if(playerBounty < 0 ) playerBounty = 0
-            if(computerBounty < 0 ) computerBounty = 0
-            if(playerBounty > 20) playerBounty = 20
-            if(computerBounty > 20 ) computerBounty = 20
-
-            // Showing the player's bounty
-            document.querySelector(".player-bounty").innerHTML = "Player bounty: " + playerBounty + " kernels."
-            // Showing the computer's bounty
-            document.querySelector(".computer-bounty").innerHTML = "Computer bounty: " + computerBounty + " kernels."
-            
-            console.log("hand:", computerHand)
+        function validateUsername(el) {
+            if(el.value.length < 3) alert("Username must be greater than three characters in length")
         }
 
-        function resetComputerHand() {
-            // set computer hand by randomly generating the number of kernels in computers hand
-            computerHand = Math.floor((Math.random() * computerBounty) + 1)
-            console.log("hand:", computerHand)
+        function validateEmail(el) {
+            if(!(el.value.includes("@gmail.com"))) alert("Email must be a gmail account")
         }
 
-        function playGame() {
-            var playerGuess
-            var message = ''
+        function calculateAge(el) {
+            let today = new Date()
 
-            // get guess input
-            var playerGuessInputElement = document.getElementById('player-guess-input')
-            var playerGuess = parseInt(playerGuessInputElement.value)
+            // Convert user date string value for input to separate integers
+            let userDobYear = parseInt(el.value.substring(0,4))
+            let userDobMonth = parseInt(el.value.substring(5,7))
+            let userDobDay = parseInt(el.value.substring(8))
+
+            let userAge = today.getFullYear() - userDobYear
+            // validate user age
+            if(userAge < 5) {
+                alert("Age cannot be less than 5!")
+            } else {
+                document.getElementById("age").value = userAge
+            }
+        }
+
+        function checkGuess() {
+            let playerGuess
+            let message = ''
+
+            let gameData = {
+                totalGames: 0,
+                wins: 0,
+                losses: 0,
+                bounty: playerBounty
+            }
+
+            let playerGuessInputElement = document.getElementById('player-guess-input')
+            playerGuess = parseInt(playerGuessInputElement.value)
 
             if(playerGuess > computerBounty) {
                 message = "Your guess cannot be higher than your bounty!"
@@ -84,36 +100,69 @@
                 maxNumOfChances = 3
                 playerBounty += computerHand
                 computerBounty -= computerHand
+                gameData.totalGames++
+                gameData.wins++
                 playerGuessInputElement.value = ''
-                resetComputerHand()
-                renderGame()
+                playGame()
             }
             
             if(maxNumOfChances === 0) {
                 message = "Aw! You couldn't figure it out. The correct number was " + computerHand + ". " + computerHand + " kernel(s) will now be taken from your bounty."
-                message += "The computer took out another random set of kernels. You have three more tries. Guess again"
-                maxNumOfChances = 3
+                gameData.losses++
                 playerBounty -= computerHand
                 computerBounty += computerHand
                 playerGuessInputElement.value = ''
-                resetComputerHand()
-                renderGame()
             }
 
-
-            if(playerBounty <= 0) {
+            if(playerBounty <= 0 || maxNumOfChances === 0) {
                 message += "You lose!"
+                maxNumOfChances = 3
                 playerGuessInputElement.disabled = true
-                // TODO: Add try again button
+                document.getElementById("guess-btn").disabled = true
+                document.getElementById("play-again-btn").disabled = false
             }
             
             if(computerBounty <= 0) {
                 message = "You win! Computer has no kernels left."
+                maxNumOfChances = 3
                 playerGuessInputElement.disabled = true
-                // TODO: Add try again button
+                document.getElementById("guess-btn").disabled = true
+                document.getElementById("play-again-btn").disabled = false
             }
 
+            gameData.playerBounty = playerBounty
+
+            playersData.push(gameData)
+
             document.getElementById("game-message").innerHTML = message
+        }
+
+        function playGame(isPlayAgain) {
+            // set computer hand by randomly generating the number of kernels in computers hand
+            computerHand = Math.floor((Math.random() * computerBounty) + 1)
+            console.log("hand:", computerHand)
+
+            if(isPlayAgain) {
+                document.getElementById('player-guess-input').disabled = false
+                document.getElementById("guess-btn").disabled = false
+            }
+
+            // Hide registration form
+            document.getElementById("player-registration").classList.add("hide")
+
+            // show game UI
+            document.querySelector(".game").classList.remove("hide")
+
+            // Setting constraints for bounties
+            if(playerBounty < 0 ) playerBounty = 0
+            if(computerBounty < 0 ) computerBounty = 0
+            if(playerBounty > startingKernels * 2) playerBounty = startingKernels * 2
+            if(computerBounty > startingKernels * 2) computerBounty = startingKernels * 2
+
+            // Showing the player's bounty
+            document.querySelector(".player-bounty").innerHTML = "Player bounty: " + playerBounty + " kernels."
+            // Showing the computer's bounty
+            document.querySelector(".computer-bounty").innerHTML = "Computer bounty: " + computerBounty + " kernels."
 
         }
 
@@ -134,11 +183,25 @@
     <form id="player-registration">
         <h1>Registration</h1>
         <label for="username">Username:</label>
-        <input type="text" name="username" id="username">
+        <input type="text" name="username" id="username" onBlur="validateUsername(this)"><br/><br/>
 
-        <input type="submit" value="Register">
-        <input type="button" onclick="renderGame()" value="Play">
-        <input type="button" onclick="quit()" value="Quit">
+        <label for="dob">Date of birth:</label>
+		<input type="date" id="dob" name="dob" onblur="calculateAge(this)"></input><br/><br/>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" placeholder="john@gmail.com" size="40" 
+        maxlength="25" onblur="validateEmail(this)"></input><br/><br/>
+
+        <label for="age">Age:</label>
+		<input type="number" id="age" name="age"></input><br/><br/>
+
+        <label for="gender">Gender:</label>
+        <input type="radio" id="gender" name="gender" value='males'>Male</input>
+        <input type="radio" id="gender" name="gender" value='females'>Female</input><br/><br/>
+
+        <input id="register-btn" type="button" value="Register" onclick="register()">
+        <input id="play-btn" type="button" onclick="playGame(false)" value="Play" disabled>
+        <input id="quit-btn" type="button" onclick="quit()" value="Quit" disabled>
         <p class="error-message"></p>
     </form>
     
@@ -149,7 +212,8 @@
         <p class="computer-bounty"></p>
         <label for="player-guess-input">Guess the number of kernels in the computer's hand:</label>
         <input type="number" id="player-guess-input">
-        <input id="guess-btn" type="button" value="Guess" onclick="playGame()">
+        <input id="guess-btn" type="button" value="Guess" onclick="checkGuess()">
+        <input id="play-again-btn" type="button" value="Play Again" onclick="playGame(true)" disabled>
         <p id="game-message"></p>
         <input type="button" onclick="quit()" value="Quit">
         

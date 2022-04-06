@@ -102,37 +102,40 @@
                 computerBounty -= computerHand
                 gameData.totalGames++
                 gameData.wins++
+                gameData.playerBounty = playerBounty
                 playerGuessInputElement.value = ''
                 playGame()
             }
             
             if(maxNumOfChances === 0) {
-                message = "Aw! You couldn't figure it out. The correct number was " + computerHand + ". " + computerHand + " kernel(s) will now be taken from your bounty."
-                gameData.losses++
-                playerBounty -= computerHand
-                computerBounty += computerHand
-                playerGuessInputElement.value = ''
-            }
-
-            if(playerBounty <= 0 || maxNumOfChances === 0) {
-                message += "You lose!"
-                maxNumOfChances = 3
-                playerGuessInputElement.disabled = true
-                document.getElementById("guess-btn").disabled = true
-                document.getElementById("play-again-btn").disabled = false
+                if (playerBounty <= 0) {
+                    message = "Game over!"
+                } else {
+                    message = "Aw! You couldn't figure it out. The correct number was " + computerHand + ". " + computerHand + " kernel(s) will now be taken from your bounty. Select 'Play again' to continue guessing or 'Quit' to stop playing"
+                    maxNumOfChances = 3
+                    playerBounty -= computerHand
+                    computerBounty += computerHand
+                    gameData.totalGames++
+                    gameData.losses++
+                    gameData.playerBounty = playerBounty
+                    playersData.push(gameData)
+                    playerGuessInputElement.disabled = true
+                    document.getElementById("guess-btn").disabled = true
+                    document.getElementById("play-again-btn").disabled = false
+                    playerGuessInputElement.value = ''
+                    playGame()
+                }
             }
             
             if(computerBounty <= 0) {
                 message = "You win! Computer has no kernels left."
                 maxNumOfChances = 3
+                gameData.wins++
+                playersData.push(gameData)
                 playerGuessInputElement.disabled = true
                 document.getElementById("guess-btn").disabled = true
                 document.getElementById("play-again-btn").disabled = false
             }
-
-            gameData.playerBounty = playerBounty
-
-            playersData.push(gameData)
 
             document.getElementById("game-message").innerHTML = message
         }
@@ -142,39 +145,37 @@
             computerHand = Math.floor((Math.random() * computerBounty) + 1)
             console.log("hand:", computerHand)
 
+            // If the user clicks the try again button, re-enable guess input field
             if(isPlayAgain) {
                 document.getElementById('player-guess-input').disabled = false
                 document.getElementById("guess-btn").disabled = false
             }
 
-            // Hide registration form
-            document.getElementById("player-registration").classList.add("hide")
-
             // show game UI
             document.querySelector(".game").classList.remove("hide")
 
-            // Setting constraints for bounties
+            // Setting constraints for bounties, so no negative number is shown or no number 
+            // greater than the startingKernels is shown
             if(playerBounty < 0 ) playerBounty = 0
             if(computerBounty < 0 ) computerBounty = 0
             if(playerBounty > startingKernels * 2) playerBounty = startingKernels * 2
             if(computerBounty > startingKernels * 2) computerBounty = startingKernels * 2
 
             // Showing the player's bounty
-            document.querySelector(".player-bounty").innerHTML = "Player bounty: " + playerBounty + " kernels."
+            document.querySelector(".player-bounty").innerHTML = `${document.getElementById("username").value}'s bounty: ${playerBounty} kernels.`
             // Showing the computer's bounty
             document.querySelector(".computer-bounty").innerHTML = "Computer bounty: " + computerBounty + " kernels."
-
         }
 
-        function quit() {
-            // Hide registration form
-            document.getElementById("player-registration").classList.add("hide")
-            
-            // Hide game screen if it isn't already hidden
-            if(!('hide' in document.querySelector(".game").classList)) document.querySelector(".game").classList.add("hide")
+        function findPercentageScore() {
+            showPercentageTextArea = document.getElementById("show-percentage")
 
-            // show quit screen
-            document.querySelector(".quit").classList.remove("hide")
+            showPercentageTextArea.value = ""
+
+            percentageScoreString = `Name: ${document.getElementById("username").value}Date: ${new Date()}<br/>Total games: ${playersData[1].totalGames}, Games won: ${playersData[1].wins},
+                                    Games lost: ${playersData[1].losses}, Percentage won: ${Math.floor(playersData[1].wins/playersData[1].losses * 100)}%`
+
+            showPercentageTextArea.value = percentageScoreString
         }
     </script>
 </head>
@@ -201,8 +202,10 @@
 
         <input id="register-btn" type="button" value="Register" onclick="register()">
         <input id="play-btn" type="button" onclick="playGame(false)" value="Play" disabled>
-        <input id="quit-btn" type="button" onclick="quit()" value="Quit" disabled>
-        <p class="error-message"></p>
+        <input id="quit-btn" type="button" onclick="findPercentageScore()" value="Quit" disabled><br/><br/>
+
+        <h2>Game Statistics</h2>
+        <textarea id="show-percentage" rows="5" cols="30"></textarea>
     </form>
     
     <!-- Game Screen -->
@@ -215,14 +218,6 @@
         <input id="guess-btn" type="button" value="Guess" onclick="checkGuess()">
         <input id="play-again-btn" type="button" value="Play Again" onclick="playGame(true)" disabled>
         <p id="game-message"></p>
-        <input type="button" onclick="quit()" value="Quit">
-        
-    </div>
-
-    <!-- Quit Screen -->
-    <div class="quit hide">
-        <h1>Thanks for playing!</h1>
-        <p>Reload page to try again</p>
     </div>
 </body>
 </html>
